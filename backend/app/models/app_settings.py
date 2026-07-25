@@ -26,7 +26,7 @@ class AppSettings(Base):
     setup_dt = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_dt = Column(DateTime(timezone=True), onupdate=func.now())
 
-    __table_args__ = (
-        CheckConstraint("next_invoice_number >= 1", name="next_invoice_number_positive_check")
+    __table_args__  = (
+        CheckConstraint("next_invoice_number >= 1", name="next_invoice_number_positive_check"),
     )
 
