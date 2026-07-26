@@ -12,6 +12,7 @@ class AppSettings(Base):
     id = Column(Integer, primary_key=True)
     invoice_prefix = Column(String(10), nullable=True, server_default=text("'INV-'"))
     next_invoice_number = Column(Integer, nullable=False, server_default=text("1"))
+    pdf_storage_dir = Column(String(500), nullable=True)
 
     fname = Column(String(50), nullable=True)
     lname = Column(String(50), nullable=True)

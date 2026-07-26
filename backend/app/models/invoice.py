@@ -42,3 +42,7 @@ class Invoice(Base):
         CheckConstraint("total >= 0", name="total_nonnegative_check"),
     )
 
+    # `has_pdf` is a field in the InvoiceDetailResponse schema
+    @property
+    def has_pdf(self) -> bool:
+        return self.pdf_path is not None
