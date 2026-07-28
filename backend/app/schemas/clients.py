@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, model_validator
 from typing import Optional
+from datetime import datetime
 
 class ClientFields(BaseModel):
     fname: Optional[str] = None
@@ -24,6 +25,8 @@ class ClientDetailResponse(ClientFields):
     id: int
     display_name: str
     active: bool
+    setup_dt: datetime
+    updated_dt: datetime | None
 
     model_config = {
         "from_attributes": True
@@ -52,6 +55,8 @@ class AddressUpdateRequest(BaseModel):
 # grows, this may have to change
 class AddressDetailResponse(AddressCreateRequest):
     id: int
+    setup_dt: datetime
+    updated_dt: datetime | None
 
     model_config = {
         "from_attributes": True
