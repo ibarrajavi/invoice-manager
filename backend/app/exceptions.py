@@ -19,11 +19,12 @@ class ClientDeleteError(AppError):
         self.client_id = client_id
         super().__init__(f"Client {client_id} could not be deleted")
 
-class ClientDeactivateError(AppError):
-    """Raised when a client is already inactive."""
-    def __init__(self, client_id: int):
+class ClientActiveStateError(AppError):
+    """Raised when a client is already in the requested active state."""
+    def __init__(self, client_id: int, active: bool):
         self.client_id = client_id
-        super().__init__(f"Client {client_id} is already inactive")
+        self.active = active
+        super().__init__(f"Client {client_id} is already {'active' if active else 'inactive'}.")
 
 class ClientNameError(AppError):
     """Raised when a client getting created doesn't have a name."""
@@ -36,3 +37,8 @@ class ClientEmailError(AppError):
         self.email = email
         super().__init__(f"Email address is already taken.")
 
+class ClientStatusUpdateError(AppError):
+    """Raised when a client active status could not be updated."""
+    def __init__(self, client_id: int):
+        self.client_id = client_id
+        super().__init__(f"Active status for client {client_id} could not be updated")
