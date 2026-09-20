@@ -1,7 +1,18 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, func, text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    func,
+    text,
+)
 from sqlalchemy.orm import relationship
 
 from app.utils.database import Base
+
 
 class Address(Base):
     """
@@ -27,3 +38,12 @@ class Address(Base):
 
     client = relationship("Client", back_populates="addresses")
 
+    __table_args__ = (
+        Index(
+            "uq_address_one_default_per_client",
+            "client_id",
+            unique=True,
+            sqlite_where=text("is_default = 1"),
+            postgresql_where=text("is_default = true"),
+        ),
+    )
