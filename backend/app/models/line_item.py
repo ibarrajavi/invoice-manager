@@ -1,19 +1,30 @@
 from decimal import Decimal
 
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Index, CheckConstraint, text
+from sqlalchemy import (
+    CheckConstraint,
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    text,
+)
 from sqlalchemy.orm import relationship
 
 from app.utils.database import Base
+
 
 class LineItem(Base):
     """
     This table contains the item details
     for a row on an invoice.
     """
+
     __tablename__ = "line_item"
 
     id = Column(Integer, primary_key=True)
-    invoice_id  = Column(Integer, ForeignKey("invoice.id"), nullable=False, index=True)
+    invoice_id = Column(Integer, ForeignKey("invoice.id"), nullable=False, index=True)
 
     description = Column(String(500), nullable=False)
     qty = Column(Integer, nullable=False)
@@ -32,4 +43,3 @@ class LineItem(Base):
     @property
     def line_total(self) -> Decimal:
         return self.qty * Decimal(self.unit_price)
-

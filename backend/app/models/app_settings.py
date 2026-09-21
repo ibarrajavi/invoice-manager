@@ -1,12 +1,14 @@
-from sqlalchemy import Column, Integer, String, DateTime, CheckConstraint, func, text
+from sqlalchemy import CheckConstraint, Column, DateTime, Integer, String, func, text
 
 from app.utils.database import Base
+
 
 class AppSettings(Base):
     """
     This table contains the user's details
     that will appear on generated invoices.
     """
+
     __tablename__ = "app_settings"
 
     id = Column(Integer, primary_key=True)
@@ -23,11 +25,14 @@ class AppSettings(Base):
     zip_code = Column(String(10), nullable=True)
     phone_num = Column(String(20), nullable=True)
     email = Column(String(150), nullable=True)
-    
-    setup_dt = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    setup_dt = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     updated_dt = Column(DateTime(timezone=True), onupdate=func.now())
 
-    __table_args__  = (
-        CheckConstraint("next_invoice_number >= 1", name="next_invoice_number_positive_check"),
+    __table_args__ = (
+        CheckConstraint(
+            "next_invoice_number >= 1", name="next_invoice_number_positive_check"
+        ),
     )
-

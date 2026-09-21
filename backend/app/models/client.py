@@ -9,6 +9,7 @@ class Client(Base):
     This table contains the client details
     that will be displayed on issued invoices.
     """
+
     __tablename__ = "client"
 
     id = Column(Integer, primary_key=True)
@@ -21,11 +22,15 @@ class Client(Base):
 
     active = Column(Boolean, nullable=False, default=True)
 
-    setup_dt = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    setup_dt = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     updated_dt = Column(DateTime(timezone=True), onupdate=func.now())
 
     invoices = relationship("Invoice", back_populates="client")
-    addresses = relationship("Address", back_populates="client", cascade="all, delete-orphan")
+    addresses = relationship(
+        "Address", back_populates="client", cascade="all, delete-orphan"
+    )
 
     # Prioritize the company name and if there is no
     # company name, then return the full client name
@@ -35,4 +40,3 @@ class Client(Base):
             return self.company_name
         full_name = f"{self.fname or ''} {self.lname or ''}".strip()
         return full_name or f"Client #{self.id}"
-
