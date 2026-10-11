@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class ClientFields(BaseModel):
@@ -12,32 +12,25 @@ class ClientFields(BaseModel):
 
 
 class ClientCreateRequest(ClientFields):
-    # Validation to confirm that an identifier
-    # for the client is in the request
-    @model_validator(mode="after")
-    def require_identifying_info(self):
-        if not self.company_name and not (self.fname or self.lname):
-            raise ValueError("Provide a company name or first/last name")
-        return self
+    # Name rules are enforced by the service (ClientNameError)
+    pass
 
 
 class ClientUpdateRequest(ClientFields):
-    active: bool | None = None
+    pass
 
 
 class ClientDetailResponse(ClientFields):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     display_name: str
     active: bool
     setup_dt: datetime
     updated_dt: datetime | None
 
-    model_config = {"from_attributes": True}
 
-
-class AddressCreateRequest(BaseModel):
-    client_id: int
-    is_default: bool
+class AddressFields(BaseModel):
     label: str
     addr_line1: str
     addr_line2: str | None = None
@@ -46,8 +39,11 @@ class AddressCreateRequest(BaseModel):
     zip_code: str
 
 
+class AddressCreateRequest(AddressFields):
+    pass
+
+
 class AddressUpdateRequest(BaseModel):
-    is_default: bool | None = None
     label: str | None = None
     addr_line1: str | None = None
     addr_line2: str | None = None
@@ -56,11 +52,15 @@ class AddressUpdateRequest(BaseModel):
     zip_code: str | None = None
 
 
-# Using inheritance for now. If the create request
-# grows, this may have to change
-class AddressDetailResponse(AddressCreateRequest):
+class AddressDefaultRequest(BaseModel):
+    is_default: bool
+
+
+class AddressDetailResponse(AddressFields):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
+    client_id: int
+    is_default: bool
     setup_dt: datetime
     updated_dt: datetime | None
-
-    model_config = {"from_attributes": True}
