@@ -1,6 +1,3 @@
-from enum import Enum
-from typing import Literal
-
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -20,16 +17,7 @@ from app.exceptions import (
     RequiredFieldError,
 )
 from app.models import Address, Client, Invoice
-
-
-# Sentinel marking a field that was omitted
-# Different from None which clears the field
-class Sentinel(Enum):
-    UNSET = "UNSET"
-
-
-UNSET = Sentinel.UNSET
-type Unset = Literal[Sentinel.UNSET]
+from app.utils.sentinel import UNSET, Unset
 
 # HELPER FUNCTIONS
 
@@ -109,7 +97,7 @@ def create_client(
     """
     Create a new client row and commit.
 
-    - Raises ClientNameError if the client's full name 
+    - Raises ClientNameError if the client's full name
       or company name is not entered.
     - Raises ClientEmailError if email is taken.
     """
