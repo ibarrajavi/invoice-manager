@@ -19,7 +19,7 @@ from app.exceptions import (
 )
 from app.models import Address, Client, Invoice
 from app.utils.sentinel import UNSET, Unset
-from app.utils.text import _clean, _clean_email
+from app.utils.text import clean, clean_email
 
 # HELPER FUNCTIONS
 
@@ -30,7 +30,7 @@ def _require(value: str, field: str) -> str:
 
     - Raises RequiredFieldError if the value is empty or whitespace only.
     """
-    cleaned = _clean(value)
+    cleaned = clean(value)
     if cleaned is None:
         raise RequiredFieldError(field)
     return cleaned
@@ -90,11 +90,11 @@ def create_client(
       or company name is not entered.
     - Raises ClientEmailError if email is taken.
     """
-    fname = _clean(fname)
-    lname = _clean(lname)
-    email = _clean_email(email)
-    phone = _clean(phone)
-    company_name = _clean(company_name)
+    fname = clean(fname)
+    lname = clean(lname)
+    email = clean_email(email)
+    phone = clean(phone)
+    company_name = clean(company_name)
 
     # Must at least have a full name or company name
     if not _has_name(fname, lname, company_name):
@@ -147,7 +147,7 @@ def update_client(
     client = get_client(db, client_id)
 
     if email is not UNSET:
-        email = _clean_email(email)
+        email = clean_email(email)
 
     updates = {
         "fname": fname,
@@ -159,7 +159,7 @@ def update_client(
 
     # Clean the provided fields. Omitted fields are ignored.
     changes = {
-        field: _clean(value) for field, value in updates.items() if value is not UNSET
+        field: clean(value) for field, value in updates.items() if value is not UNSET
     }
 
     # Check the names the client will have after the update
@@ -297,7 +297,7 @@ def create_address(
 
     label = _require(label, "label")
     addr_line1 = _require(addr_line1, "addr_line1")
-    addr_line2 = _clean(addr_line2)
+    addr_line2 = clean(addr_line2)
     city = _require(city, "city")
     state = _require(state, "state")
     zip_code = _require(zip_code, "zip_code")
@@ -361,7 +361,7 @@ def update_address(
     for field, value in updates.items():
         if value is UNSET:
             continue
-        changes[field] = _require(value, field) if field in required else _clean(value)
+        changes[field] = _require(value, field) if field in required else clean(value)
 
     for field, value in changes.items():
         setattr(address, field, value)

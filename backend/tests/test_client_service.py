@@ -13,14 +13,14 @@ from sqlalchemy import select
 
 def test_clean_strips_whitespace():
     var = "  Javi "
-    clean_var = svc._clean(var)
+    clean_var = svc.clean(var)
 
     assert clean_var == "Javi"
 
 
 def test_clean_returns_none():
     var = None
-    clean_var = svc._clean(var)
+    clean_var = svc.clean(var)
 
     assert clean_var is None
 
@@ -44,14 +44,14 @@ def test_require_empty_value():
 
 def test_clean_email_lowercase():
     var = "  IbarraJavi@gmail.com "
-    clean_var = svc._clean_email(var)
+    clean_var = svc.clean_email(var)
 
     assert clean_var == "ibarrajavi@gmail.com"
 
 
 def test_clean_email_returns_none():
     var = None
-    clean_var = svc._clean_email(var)
+    clean_var = svc.clean_email(var)
 
     assert clean_var is None
 
