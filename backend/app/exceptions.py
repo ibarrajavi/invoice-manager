@@ -122,7 +122,7 @@ class AddressDefaultError(AddressOperationError):
         super().__init__(
             address_id=address_id,
             client_id=client_id,
-            message=f"Address {address_id} could not be set as the default for client {client_id}."
+            message=f"Address {address_id} could not be set as the default for client {client_id}.",
         )
 
 
@@ -165,7 +165,9 @@ class InvalidStatusTransitionError(AppError):
         self.invoice_id = invoice_id
         self.current = current
         self.target = target
-        super().__init__(f"Invoice {invoice_id} cannot change from {current} to {target}.")
+        super().__init__(
+            f"Invoice {invoice_id} cannot change from {current} to {target}."
+        )
 
 
 class InvoiceAddressMismatchError(AppError):
@@ -184,3 +186,32 @@ class InvoiceIssueError(AppError):
         self.invoice_id = invoice_id
         super().__init__(f"Invoice {invoice_id} could not be issued.")
 
+
+# SETTINGS EXCEPTIONS
+
+
+class InvalidNextInvoiceNumberError(AppError):
+    """Raised when next_invoice_number would go below its current value after issuing."""
+
+    def __init__(self, value: int, minimum: int):
+        self.value = value
+        self.minimum = minimum
+        super().__init__(
+            f"Next invoice number {value} is below the current value {minimum}. "
+            "Lowering it after invoices are issued could reuse a number."
+        )
+
+
+class PdfStorageDirError(AppError):
+    """Raised when the PDF storage folder is missing or not writable."""
+
+    def __init__(self, path: str, reason: str):
+        self.path = path
+        super().__init__(f"PDF storage folder '{path}' {reason}.")
+
+
+class SettingsUpdateError(AppError):
+    """Raised when settings could not be saved."""
+
+    def __init__(self):
+        super().__init__("Settings could not be updated.")

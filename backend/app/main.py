@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.api.errors import register_exception_handlers
 from app.api.v1.clients import router as clients_router
+from app.api.v1.settings import router as settings_router
 from app.utils.database import init_db
 
 
@@ -22,6 +23,7 @@ app = FastAPI(
 
 register_exception_handlers(app)
 app.include_router(clients_router, prefix="/api/v1")
+app.include_router(settings_router, prefix="/api/v1")
 
 @app.get("/")
 def app_health():

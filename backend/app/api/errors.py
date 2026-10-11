@@ -15,12 +15,15 @@ from app.exceptions import (
     ClientNameError,
     ClientNotFoundError,
     ClientStatusUpdateError,
+    InvalidNextInvoiceNumberError,
     InvalidStatusTransitionError,
     InvoiceAddressMismatchError,
     InvoiceIssueError,
     InvoiceNotDraftError,
     InvoiceNotFoundError,
+    PdfStorageDirError,
     RequiredFieldError,
+    SettingsUpdateError,
 )
 
 STATUS_CODES: dict[type[AppError], int] = {
@@ -41,11 +44,14 @@ STATUS_CODES: dict[type[AppError], int] = {
     ClientNameError: 422,
     RequiredFieldError: 422,
     InvoiceAddressMismatchError: 422,
+    InvalidNextInvoiceNumberError: 422,
+    PdfStorageDirError: 422,
     # INTERNAL SERVER ERROR
     ClientDeleteError: 500,
     ClientStatusUpdateError: 500,
     AddressDeleteError: 500,
     InvoiceIssueError: 500,
+    SettingsUpdateError: 500,
 }
 
 
