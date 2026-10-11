@@ -1,23 +1,53 @@
+from datetime import datetime
 from decimal import Decimal
+from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-
-class LineItemCreateRequest(BaseModel):
-    description: str
-    qty: int
-    unit_price: Decimal
-    position: int
+InvoiceStatus = Literal["draft", "issued", "paid", "void"]
+StatusTransitionTarget = Literal["issued", "paid", "void"]
 
 
-class LineItemDetailResponse(LineItemCreateRequest):
+class LineItemBase(BaseModel):
+    description: str = Field(min_length=1, max_length=500)
+    qty: int = Field(gt=0)
+    unit_price: Decimal = Field(ge=0, decimal_places=2)
+
+
+class LineItemCreateRequest(LineItemBase):
+    # Position is assigned by the service from list order
+    pass
+
+
+class LineItemDetailResponse(LineItemBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
+    position: int
+    line_total: Decimal
 
-    model_config = {"from_attributes": True}
+
+class InvoiceCreateRequest(BaseModel):
+    client_id: int
+    address_id: int
+    line_items: list[LineItemCreateRequest] = Field(min_length=1)
 
 
-class InvoiceFields(BaseModel):
-    # Snapshot of bill to details
+class InvoiceContentUpdateRequest(BaseModel):
+    # Omitted fields stay UNSET in the service via model_dump(exclude_unset=True)
+    client_id: int | None = None
+    address_id: int | None = None
+    line_items: list[LineItemCreateRequest] | None = Field(default=None, min_length=1)
+
+
+class InvoiceStatusUpdateRequest(BaseModel):
+    # Only checks the target value; whether the transition is
+    # allowed from the current status is the service's job
+    status: StatusTransitionTarget
+
+
+class BillToSnapshot(BaseModel):
+    # Populated by issue_invoice; null while the invoice is a draft
     bill_to_name: str | None = None
     bill_to_company: str | None = None
     bill_to_email: EmailStr | None = None
@@ -29,36 +59,18 @@ class InvoiceFields(BaseModel):
     bill_to_zip_code: str | None = None
 
 
-class InvoiceCreateRequest(InvoiceFields):
-    client_id: int
-    # `Field(min_length=1)` basically ensures that we
-    # aren't creating an invoice with zero line items
-    line_items: list[LineItemCreateRequest] = Field(min_length=1)
+class InvoiceDetailResponse(BillToSnapshot):
+    model_config = ConfigDict(from_attributes=True)
 
-
-class InvoiceContentUpdateRequest(InvoiceFields):
-    client_id: int | None = None
-    line_items: list[LineItemCreateRequest] | None = None
-
-
-class InvoiceStatusUpdateRequest(BaseModel):
-    status: str
-
-    # Validation to ensure that an invoice status
-    # cannot be reverted to "draft"
-    @model_validator(mode="after")
-    def validate_status(self):
-        if self.status not in ("sent", "paid", "void"):
-            raise ValueError("Invalid status transition target")
-        return self
-
-
-class InvoiceDetailResponse(InvoiceFields):
     id: int
+    client_id: int
+    address_id: int
     invoice_no: str | None = None
-    status: str
+    status: InvoiceStatus
     total: Decimal
     line_items: list[LineItemDetailResponse]
     has_pdf: bool
-
-    model_config = {"from_attributes": True}
+    setup_dt: datetime
+    updated_dt: datetime | None
+    issue_dt: datetime | None
+    paid_dt: datetime | None
