@@ -19,15 +19,9 @@ from app.exceptions import (
 )
 from app.models import Address, Client, Invoice
 from app.utils.sentinel import UNSET, Unset
+from app.utils.text import _clean, _clean_email
 
 # HELPER FUNCTIONS
-
-
-def _clean(value: str | None) -> str | None:
-    """Strip whitespace, returning None if the result is empty."""
-    if value is None:
-        return None
-    return value.strip() or None
 
 
 def _require(value: str, field: str) -> str:
@@ -40,12 +34,6 @@ def _require(value: str, field: str) -> str:
     if cleaned is None:
         raise RequiredFieldError(field)
     return cleaned
-
-
-def _clean_email(value: str | None) -> str | None:
-    """Strip and lowercase an email, returning None if it is blank."""
-    cleaned = _clean(value)
-    return cleaned.lower() if cleaned else None
 
 
 def _has_name(
