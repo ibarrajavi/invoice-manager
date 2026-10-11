@@ -10,6 +10,9 @@ class RequiredFieldError(AppError):
         super().__init__(f"{field} is a required field.")
 
 
+# CLIENT EXCEPTIONS
+
+
 class ClientNotFoundError(AppError):
     """Raised when a client cannot be found by the given identifier."""
 
@@ -67,10 +70,13 @@ class ClientStatusUpdateError(AppError):
         super().__init__(f"Active status for client {client_id} could not be updated.")
 
 
+# ADDRESS EXCEPTIONS
+
+
 class AddressOperationError(AppError):
     """Base class for address errors. Raise a subclass, not this."""
 
-    def __init__(self, address_id: int, client_id: int, message: str):
+    def __init__(self, client_id: int, message: str, address_id: int | None = None):
         self.address_id = address_id
         self.client_id = client_id
         super().__init__(message)
@@ -81,8 +87,9 @@ class AddressNotFoundError(AddressOperationError):
 
     def __init__(self, address_id: int, client_id: int):
         super().__init__(
-            address_id, client_id,
-            f"Address {address_id} not found for client {client_id}.",
+            address_id=address_id,
+            client_id=client_id,
+            message=f"Address {address_id} not found for client {client_id}.",
         )
 
 
@@ -91,8 +98,9 @@ class AddressDeleteError(AddressOperationError):
 
     def __init__(self, address_id: int, client_id: int):
         super().__init__(
-            address_id, client_id,
-            f"Address {address_id} could not be deleted for client {client_id}.",
+            address_id=address_id,
+            client_id=client_id,
+            message=f"Address {address_id} could not be deleted for client {client_id}.",
         )
 
 
@@ -101,8 +109,9 @@ class AddressInUseError(AddressOperationError):
 
     def __init__(self, address_id: int, client_id: int):
         super().__init__(
-            address_id, client_id,
-            f"Address {address_id} is currently in use for client {client_id}.",
+            address_id=address_id,
+            client_id=client_id,
+            message=f"Address {address_id} is currently in use for client {client_id}.",
         )
 
 
@@ -111,6 +120,19 @@ class AddressDefaultError(AddressOperationError):
 
     def __init__(self, address_id: int, client_id: int):
         super().__init__(
-            address_id, client_id,
-            f"Address {address_id} could not be set as the default for client {client_id}."
+            address_id=address_id,
+            client_id=client_id,
+            message=f"Address {address_id} could not be set as the default for client {client_id}."
+        )
+
+
+class AddressConflictError(AddressOperationError):
+    """Raised when an address create or update violates a database constraint."""
+
+    def __init__(self, client_id: int, address_id: int | None = None):
+        target = f"Address {address_id}" if address_id is not None else "New address"
+        super().__init__(
+            address_id=address_id,
+            client_id=client_id,
+            message=f"{target} for client {client_id} conflicts with an existing address.",
         )

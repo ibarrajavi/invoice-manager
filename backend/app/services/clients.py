@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.exceptions import (
+    AddressConflictError,
     AddressDefaultError,
     AddressDeleteError,
     AddressInUseError,
@@ -301,7 +302,7 @@ def create_address(
 
     - Raises ClientNotFoundError if client doesn't exist.
     - Raises RequiredFieldError if a required field is blank.
-    - Raises IntegrityError if a database constraint is violated.
+    - Raises AddressConflictError if a database constraint is violated.
     """
     # First check if client exists
     get_client(db, client_id)
@@ -326,11 +327,9 @@ def create_address(
     db.add(address)
     try:
         db.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         db.rollback()
-        # Raising the error so the router can
-        # return an HTTP error
-        raise
+        raise AddressConflictError(client_id) from e
     # Refreshing to load the setup_dt column
     db.refresh(address)
     return address
@@ -355,7 +354,7 @@ def update_address(
     - Raises AddressNotFoundError if the address doesn't exist or
       belongs to a different client.
     - Raises RequiredFieldError if a required field is blank.
-    - Raises IntegrityError if a database constraint is violated.
+    - Raises AddressConflictError if a database constraint is violated.
     """
     address = get_address(db, client_id, address_id)
 
@@ -381,11 +380,9 @@ def update_address(
 
     try:
         db.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         db.rollback()
-        # Raising the error so the router can
-        # return an HTTP error
-        raise
+        raise AddressConflictError(client_id, address_id) from e
     # Refreshing to load the updated_dt column
     db.refresh(address)
     return address
