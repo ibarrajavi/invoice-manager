@@ -1,10 +1,11 @@
+from decimal import Decimal
+
 from sqlalchemy import (
     CheckConstraint,
     Column,
     DateTime,
     ForeignKey,
     Integer,
-    Numeric,
     String,
     func,
     text,
@@ -25,6 +26,7 @@ class Invoice(Base):
     id = Column(Integer, primary_key=True)
     invoice_no = Column(String(32), nullable=True, unique=True, index=True)
     client_id = Column(Integer, ForeignKey("client.id"), nullable=False, index=True)
+    address_id = Column(Integer, ForeignKey("address.id"), nullable=False, index=True)
 
     setup_dt = Column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -36,7 +38,6 @@ class Invoice(Base):
     status = Column(
         String(10), nullable=False, server_default=text("'draft'"), index=True
     )
-    total = Column(Numeric(12, 2), nullable=False, server_default=text("0.00"))
     pdf_path = Column(String(512), nullable=True)
 
     bill_to_name = Column(String(256), nullable=True)
@@ -51,6 +52,7 @@ class Invoice(Base):
     bill_to_zip_code = Column(String(10), nullable=True)
 
     client = relationship("Client", back_populates="invoices")
+    address = relationship("Address")
     line_items = relationship(
         "LineItem",
         back_populates="invoice",
@@ -60,13 +62,16 @@ class Invoice(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "status IN ('draft', 'sent', 'paid', 'void')",
+            "status IN ('draft', 'issued', 'paid', 'void')",
             name="status_valid_values_check",
         ),
-        CheckConstraint("total >= 0", name="total_nonnegative_check"),
     )
 
-    # has_pdf is a field in the InvoiceDetailResponse schema
+    # has_pdf and total are fields in the InvoiceDetailResponse schema
     @property
     def has_pdf(self) -> bool:
         return self.pdf_path is not None
+
+    @property
+    def total(self) -> Decimal:
+        return sum((item.line_total for item in self.line_items), Decimal("0.00"))

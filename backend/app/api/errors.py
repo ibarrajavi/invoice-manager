@@ -4,14 +4,22 @@ from fastapi.responses import JSONResponse
 from app.exceptions import (
     AddressConflictError,
     AddressDefaultError,
+    AddressDeleteError,
     AddressInUseError,
     AddressNotFoundError,
     AppError,
     ClientActiveStateError,
+    ClientDeleteError,
     ClientEmailError,
     ClientHasInvoicesError,
     ClientNameError,
     ClientNotFoundError,
+    ClientStatusUpdateError,
+    InvalidStatusTransitionError,
+    InvoiceAddressMismatchError,
+    InvoiceIssueError,
+    InvoiceNotDraftError,
+    InvoiceNotFoundError,
     RequiredFieldError,
 )
 
@@ -19,6 +27,7 @@ STATUS_CODES: dict[type[AppError], int] = {
     # NOT FOUND
     ClientNotFoundError: 404,
     AddressNotFoundError: 404,
+    InvoiceNotFoundError: 404,
     # CONFLICT
     ClientEmailError: 409,
     ClientHasInvoicesError: 409,
@@ -26,9 +35,17 @@ STATUS_CODES: dict[type[AppError], int] = {
     AddressInUseError: 409,
     AddressDefaultError: 409,
     AddressConflictError: 409,
+    InvoiceNotDraftError: 409,
+    InvalidStatusTransitionError: 409,
     # UNPROCESSABLE CONTENT
     ClientNameError: 422,
     RequiredFieldError: 422,
+    InvoiceAddressMismatchError: 422,
+    # INTERNAL SERVER ERROR
+    ClientDeleteError: 500,
+    ClientStatusUpdateError: 500,
+    AddressDeleteError: 500,
+    InvoiceIssueError: 500,
 }
 
 

@@ -136,3 +136,51 @@ class AddressConflictError(AddressOperationError):
             client_id=client_id,
             message=f"{target} for client {client_id} conflicts with an existing address.",
         )
+
+
+# INVOICE EXCEPTIONS
+
+
+class InvoiceNotFoundError(AppError):
+    """Raised when an invoice cannot be found by the given identifier."""
+
+    def __init__(self, invoice_id: int):
+        self.invoice_id = invoice_id
+        super().__init__(f"Invoice {invoice_id} not found.")
+
+
+class InvoiceNotDraftError(AppError):
+    """Raised when a draft-only operation targets a non-draft invoice."""
+
+    def __init__(self, invoice_id: int, status: str):
+        self.invoice_id = invoice_id
+        self.status = status
+        super().__init__(f"Invoice {invoice_id} is {status}, not draft.")
+
+
+class InvalidStatusTransitionError(AppError):
+    """Raised when an invoice cannot move from its current status to the target."""
+
+    def __init__(self, invoice_id: int, current: str, target: str):
+        self.invoice_id = invoice_id
+        self.current = current
+        self.target = target
+        super().__init__(f"Invoice {invoice_id} cannot change from {current} to {target}.")
+
+
+class InvoiceAddressMismatchError(AppError):
+    """Raised when an invoice's address does not belong to its client."""
+
+    def __init__(self, address_id: int, client_id: int):
+        self.address_id = address_id
+        self.client_id = client_id
+        super().__init__(f"Address {address_id} does not belong to client {client_id}.")
+
+
+class InvoiceIssueError(AppError):
+    """Raised when an invoice could not be issued."""
+
+    def __init__(self, invoice_id: int):
+        self.invoice_id = invoice_id
+        super().__init__(f"Invoice {invoice_id} could not be issued.")
+
